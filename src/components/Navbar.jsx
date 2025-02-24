@@ -6,13 +6,13 @@ const Navbar = () => {
     <nav className="bg-red-500 p-4 flex justify-between items-center fixed top-0 w-full z-10">
       <div className="flex space-x-4">
         <Link
-          to="/your-bookings"
+          to="/bookings"
           className="text-white font-semibold hover:bg-red-600 p-2 rounded"
         >
           Your Bookings
         </Link>
         <Link
-          to="/all-events"
+          to="/events"
           className="text-white font-semibold hover:bg-red-600 p-2 rounded"
         >
           All Events

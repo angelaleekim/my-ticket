@@ -4,8 +4,8 @@ const Modal = ({ isOpen, onClose, onConfirm, children }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-400/10">
-      <div className="bg-white p-6 rounded-lg text-black">
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-400/20">
+      <div className="bg-white p-6 rounded-2xl text-black shadow-xl border border-gray-200">
         <div className="text-black">{children}</div>
         <div className="mt-4 flex justify-end space-x-4">
           <button

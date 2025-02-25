@@ -116,10 +116,10 @@ const EventsGrid = () => {
         <h2 className="text-xl font-bold mb-4">
           {isCancel ? "Confirm Cancellation" : "Confirm Booking"}
         </h2>
-        <p>
+        <h3 className="modal">
           Are you sure you want to{" "}
           {isCancel ? "cancel the booking for" : "book"} {selectedEvent?.name}?
-        </p>
+        </h3>
       </Modal>
     </div>
   );

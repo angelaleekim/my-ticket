@@ -40,3 +40,7 @@ input::placeholder {
 .dark input::placeholder {
   color: #9ca3af; /* Tailwind's gray-400 */
 }
+
+.modal h3 {
+  color: #000000;
+}

@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import "./LoadingDots.css";
 
 const events = [
   { id: 1, name: "Event 1", date: "2023-10-01" },
@@ -13,6 +14,27 @@ const events = [
 ];
 
 const EventsGrid = () => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate a network request
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <div className="loading-dots">
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto">
       <div className="grid grid-cols-3 gap-4 justify-center p-4">

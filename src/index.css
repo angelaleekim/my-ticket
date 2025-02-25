@@ -2,6 +2,16 @@
 @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;900&display=swap");
 @import "tailwindcss";
 
+:root {
+  --bg-color: #ffffff;
+  --text-color: #000000;
+}
+
+.dark {
+  --bg-color: #000000;
+  --text-color: #ffffff;
+}
+
 body,
 * {
   font-family: "Outfit", sans-serif;
@@ -12,4 +22,21 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+.dark p {
+  color: #ffffff;
+}
+
+input::placeholder {
+  color: #9ca3af; /* Tailwind's gray-400 */
+}
+
+.dark input::placeholder {
+  color: #9ca3af; /* Tailwind's gray-400 */
 }

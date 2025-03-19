@@ -1,34 +1,54 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Modal from "./Modal";
 import { FaCheck } from "react-icons/fa";
 import { useEventFetching } from "../hooks/useEventFetching";
 import "./LoadingDots.css";
 import "./EventsGrid.css";
 
-const EventsGrid = ({authToken}) => {
-  const { events, bookedEvents, isLoading, bookEvent, unbookEvent } =
+const EventsGrid = ({ authToken }) => {
+  const { events, isLoading, bookEvent, unbookEvent, bookedEvents, setEvents } =
     useEventFetching(authToken);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isCancel, setIsCancel] = useState(false);
 
-  const handleBookEvent = (event) => {
-    setSelectedEvent(event);
-    setIsCancel(false);
+  const handleBookEvent = async (eventId) => {
+    await bookEvent(eventId);
+    setEvents((prev) =>
+      prev.map((event) =>
+        event.id === eventId ? { ...event, isBooked: true } : event
+      )
+    );
   };
 
-  const handleCancelEvent = (event) => {
-    setSelectedEvent(event);
-    setIsCancel(true);
+  const handleCancelEvent = async (eventId) => {
+    await unbookEvent(eventId);
+    setEvents((prev) =>
+      prev.map((event) =>
+        event.id === eventId ? { ...event, isBooked: false } : event
+      )
+    );
   };
 
   const confirmAction = async () => {
     if (isCancel) {
-      await unbookEvent(selectedEvent.id);
+      await handleCancelEvent(selectedEvent.id);
     } else {
-      await bookEvent(selectedEvent.id);
+      await handleBookEvent(selectedEvent.id);
     }
     setSelectedEvent(null);
   };
+
+  useEffect(() => {
+    // Ensure events state reflects the latest booking/unbooking changes
+    setEvents((prev) =>
+      prev.map((event) => ({
+        ...event,
+        isBooked: bookedEvents.some(
+          (bookedEvent) => bookedEvent._id === event.id
+        ),
+      }))
+    );
+  }, [bookedEvents, setEvents]);
 
   if (isLoading) {
     return (
@@ -46,7 +66,10 @@ const EventsGrid = ({authToken}) => {
     <div className="container mx-auto">
       <div className="events-grid">
         {events.map((event) => {
-          const isBooked = bookedEvents.some((e) => e.id === event.id);
+          // Check if the event is booked by matching the event ID with the _id in bookedEvents
+          const isBooked = bookedEvents.some(
+            (bookedEvent) => bookedEvent._id === event.id
+          );
           return (
             <div key={event.id} className="event-card">
               <h2 className="text-xl font-bold">{event.name}</h2>
@@ -61,7 +84,7 @@ const EventsGrid = ({authToken}) => {
                     Booked
                   </button>
                   <button
-                    onClick={() => handleCancelEvent(event)}
+                    onClick={() => handleCancelEvent(event.id)}
                     className="mt-2 px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500"
                   >
                     Cancel
@@ -69,7 +92,7 @@ const EventsGrid = ({authToken}) => {
                 </div>
               ) : (
                 <button
-                  onClick={() => handleBookEvent(event)}
+                  onClick={() => handleBookEvent(event.id)}
                   className="mt-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
                 >
                   Book Event

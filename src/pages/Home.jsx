@@ -3,12 +3,12 @@ import Navbar from "../components/Navbar";
 import HeroSection from "../components/HeroSection";
 import EventsSection from "../components/EventsSection";
 
-const Home = () => {
+const Home = ({ authToken }) => {
   return (
     <div className="pt-16 h-full">
       <Navbar />
       <HeroSection />
-      <EventsSection />
+      <EventsSection authToken={authToken} />
     </div>
   );
 };

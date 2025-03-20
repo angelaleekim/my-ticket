@@ -6,6 +6,7 @@ import Events from "./pages/Events";
 import { RegisterPage } from "./auth/RegisterPage.jsx";
 import { LoginPage } from "./auth/LoginPage.jsx";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
+import Welcome from "./pages/Welcome";
 import "./index.css";
 import "./App.css";
 
@@ -38,16 +39,18 @@ function App() {
       <Route
         path="/"
         element={
-          <ProtectedRoute authToken={authToken}>
-            <Home authToken={authToken}/>
-          </ProtectedRoute>
+          authToken ? (
+            <Home authToken={authToken} setAuthToken={setAuthToken} />
+          ) : (
+            <Welcome setAuthToken={setAuthToken} />
+          )
         }
       />
       <Route
         path="/bookings"
         element={
           <ProtectedRoute authToken={authToken}>
-            <Bookings authToken={authToken}/>
+            <Bookings authToken={authToken} />
           </ProtectedRoute>
         }
       />

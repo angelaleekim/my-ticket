@@ -7,19 +7,16 @@ export function useEventFetching(authToken) {
 
   useEffect(() => {
     if (!authToken) {
-      console.log("No auth token provided, skipping fetch.");
       setIsLoading(false);
       return;
     }
 
-    // Fetch all events
     fetch("http://localhost:3000/api/events", {
       headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
     })
       .then((response) => {
-        if (!response.ok) {
+        if (!response.ok)
           throw new Error(`Request failed with status ${response.status}`);
-        }
         return response.json();
       })
       .then((data) => {
@@ -31,14 +28,11 @@ export function useEventFetching(authToken) {
         setIsLoading(false);
       });
 
-    // Fetch booked events
     fetch("http://localhost:3000/api/events/booked", {
       headers: { Authorization: `Bearer ${authToken}` },
     })
       .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to fetch booked events");
-        }
+        if (!response.ok) throw new Error("Failed to fetch booked events");
         return response.json();
       })
       .then((data) => setBookedEvents(data))
@@ -51,14 +45,11 @@ export function useEventFetching(authToken) {
         `http://localhost:3000/api/events/${eventId}/book`,
         {
           method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
+          headers: { Authorization: `Bearer ${authToken}` },
         }
       );
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error(`Request failed with status ${response.status}`);
-      }
       setBookedEvents((prev) => [...prev, { _id: eventId }]);
       setEvents((prev) =>
         prev.map((event) =>
@@ -76,15 +67,14 @@ export function useEventFetching(authToken) {
         `http://localhost:3000/api/events/${eventId}/unbook`,
         {
           method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
+          headers: { Authorization: `Bearer ${authToken}` },
         }
       );
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error(`Request failed with status ${response.status}`);
-      }
-      setBookedEvents((prev) => prev.filter((bookedEvent) => bookedEvent._id !== eventId));
+      setBookedEvents((prev) =>
+        prev.filter((bookedEvent) => bookedEvent._id !== eventId)
+      );
       setEvents((prev) =>
         prev.map((event) =>
           event.id === eventId ? { ...event, isBooked: false } : event

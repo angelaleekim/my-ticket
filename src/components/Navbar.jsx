@@ -3,19 +3,15 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaSun, FaMoon } from "react-icons/fa";
 
 const Navbar = ({ authToken, setAuthToken }) => {
-  const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem("darkMode") === "true";
-  });
-
+  const [darkMode, setDarkMode] = useState(
+    () => localStorage.getItem("darkMode") === "true"
+  );
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+    if (darkMode) document.documentElement.classList.add("dark");
+    else document.documentElement.classList.remove("dark");
   }, [darkMode]);
 
   const toggleDarkMode = () => {
@@ -26,7 +22,7 @@ const Navbar = ({ authToken, setAuthToken }) => {
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     setAuthToken(null);
-    navigate("/"); // Redirect to the Welcome page
+    navigate("/");
   };
 
   const isAuthPage =

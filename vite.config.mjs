@@ -8,13 +8,14 @@ export default defineConfig({
   base: "",
   server: {
     proxy: {
-      "/api": "http://10.0.1.24:3000", 
+      "/api": "http://localhost:3000",
       "/auth": {
-        target: "http://10.0.1.24:3000",
+        target: "http://localhost:3000",
         changeOrigin: true,
         secure: false,
       },
-      "/uploads": "http://10.0.1.24:3000",
+      "/uploads": "http://localhost:3000",
     },
   },
 });
+

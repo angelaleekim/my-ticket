@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
+import Modal from "../components/Modal";
+import EventDetailsModal from "../components/EventDetailsModal";
 import { Link } from "react-router-dom";
 
 const Bookings = ({ authToken }) => {
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [detailsBooking, setDetailsBooking] = useState(null);
 
   useEffect(() => {
     if (!authToken) return;
@@ -44,7 +48,13 @@ const Bookings = ({ authToken }) => {
       setBookings((prev) => prev.filter((booking) => booking._id !== eventId));
     } catch (error) {
       console.error("Error canceling booking:", error);
+    } finally {
+      setSelectedBooking(null);
     }
+  };
+
+  const confirmCancelEvent = (eventId) => {
+    setSelectedBooking(bookings.find((booking) => booking._id === eventId));
   };
 
   if (isLoading) {
@@ -69,12 +79,16 @@ const Bookings = ({ authToken }) => {
             {bookings.map((booking) => (
               <div
                 key={booking._id}
-                className="p-4 rounded-xl shadow-md border border-gray-200"
+                className="p-4 rounded-xl shadow-md border border-gray-200 cursor-pointer hover:shadow-lg hover:translate-y-[-2px] transition-transform"
+                onClick={() => setDetailsBooking(booking)}
               >
                 <h2 className="text-xl font-bold">{booking.name}</h2>
                 <p className="text-gray-600">{booking.date}</p>
                 <button
-                  onClick={() => handleCancelEvent(booking._id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    confirmCancelEvent(booking._id);
+                  }}
                   className="mt-2 px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500"
                 >
                   Cancel
@@ -90,6 +104,33 @@ const Bookings = ({ authToken }) => {
           Back to Home
         </Link>
       </div>
+
+      <Modal
+        isOpen={!!selectedBooking}
+        onClose={() => setSelectedBooking(null)}
+        onConfirm={async () => {
+          await handleCancelEvent(selectedBooking._id);
+          setSelectedBooking(null); // Ensure modal closes after action
+        }}
+      >
+        <h2 className="text-xl font-bold mb-4">Confirm Cancellation</h2>
+        <h3 className="modal">
+          Are you sure you want to cancel the booking for{" "}
+          {selectedBooking?.name}?
+        </h3>
+      </Modal>
+
+      <EventDetailsModal
+        isOpen={!!detailsBooking}
+        onClose={() => setDetailsBooking(null)}
+        event={detailsBooking}
+        onBook={() => {}}
+        onUnbook={async (eventId) => {
+          confirmCancelEvent(eventId);
+          setDetailsBooking(null); // Close the details modal
+        }}
+        isBooked={true}
+      />
     </div>
   );
 };

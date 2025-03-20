@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Modal from "./Modal";
+import EventDetailsModal from "./EventDetailsModal";
 import { FaCheck } from "react-icons/fa";
 import { useEventFetching } from "../hooks/useEventFetching";
 import "./LoadingDots.css";
@@ -10,36 +11,37 @@ const EventsGrid = ({ authToken }) => {
     useEventFetching(authToken);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isCancel, setIsCancel] = useState(false);
+  const [detailsEvent, setDetailsEvent] = useState(null);
 
   const handleBookEvent = async (eventId) => {
-    await bookEvent(eventId);
-    setEvents((prev) =>
-      prev.map((event) =>
-        event.id === eventId ? { ...event, isBooked: true } : event
-      )
-    );
+    try {
+      await bookEvent(eventId);
+      setSelectedEvent(null); // Close the modal
+    } catch (error) {
+      console.error("Error booking event:", error);
+    }
   };
 
   const handleCancelEvent = async (eventId) => {
-    await unbookEvent(eventId);
-    setEvents((prev) =>
-      prev.map((event) =>
-        event.id === eventId ? { ...event, isBooked: false } : event
-      )
-    );
+    try {
+      await unbookEvent(eventId);
+      setSelectedEvent(null); // Close the modal
+    } catch (error) {
+      console.error("Error canceling event:", error);
+    }
   };
 
-  const confirmAction = async () => {
-    if (isCancel) {
-      await handleCancelEvent(selectedEvent.id);
-    } else {
-      await handleBookEvent(selectedEvent.id);
-    }
-    setSelectedEvent(null);
+  const confirmCancelEvent = (eventId) => {
+    setSelectedEvent(events.find((event) => event.id === eventId));
+    setIsCancel(true);
+  };
+
+  const confirmBookEvent = (eventId) => {
+    setSelectedEvent(events.find((event) => event.id === eventId));
+    setIsCancel(false);
   };
 
   useEffect(() => {
-    // Ensure events state reflects the latest booking/unbooking changes
     setEvents((prev) =>
       prev.map((event) => ({
         ...event,
@@ -56,7 +58,6 @@ const EventsGrid = ({ authToken }) => {
         <div className="loading-dots">
           <div></div>
           <div></div>
-          <div></div>
         </div>
       </div>
     );
@@ -66,12 +67,15 @@ const EventsGrid = ({ authToken }) => {
     <div className="container mx-auto">
       <div className="events-grid">
         {events.map((event) => {
-          // Check if the event is booked by matching the event ID with the _id in bookedEvents
           const isBooked = bookedEvents.some(
             (bookedEvent) => bookedEvent._id === event.id
           );
           return (
-            <div key={event.id} className="event-card">
+            <div
+              key={event.id}
+              className="event-card cursor-pointer hover:shadow-lg hover:translate-y-[-2px] transition-transform"
+              onClick={() => setDetailsEvent(event)}
+            >
               <h2 className="text-xl font-bold">{event.name}</h2>
               <p className="text-gray-600">{event.date}</p>
               {isBooked ? (
@@ -84,7 +88,10 @@ const EventsGrid = ({ authToken }) => {
                     Booked
                   </button>
                   <button
-                    onClick={() => handleCancelEvent(event.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      confirmCancelEvent(event.id);
+                    }}
                     className="mt-2 px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500"
                   >
                     Cancel
@@ -92,7 +99,10 @@ const EventsGrid = ({ authToken }) => {
                 </div>
               ) : (
                 <button
-                  onClick={() => handleBookEvent(event.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    confirmBookEvent(event.id);
+                  }}
                   className="mt-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
                 >
                   Book Event
@@ -106,7 +116,14 @@ const EventsGrid = ({ authToken }) => {
       <Modal
         isOpen={!!selectedEvent}
         onClose={() => setSelectedEvent(null)}
-        onConfirm={confirmAction}
+        onConfirm={async () => {
+          if (isCancel) {
+            await handleCancelEvent(selectedEvent.id);
+          } else {
+            await handleBookEvent(selectedEvent.id);
+          }
+          setSelectedEvent(null); // Ensure modal closes after action
+        }}
       >
         <h2 className="text-xl font-bold mb-4">
           {isCancel ? "Confirm Cancellation" : "Confirm Booking"}
@@ -116,6 +133,23 @@ const EventsGrid = ({ authToken }) => {
           {isCancel ? "cancel the booking for" : "book"} {selectedEvent?.name}?
         </h3>
       </Modal>
+
+      <EventDetailsModal
+        isOpen={!!detailsEvent}
+        onClose={() => setDetailsEvent(null)}
+        event={detailsEvent}
+        onBook={async (eventId) => {
+          confirmBookEvent(eventId);
+          setDetailsEvent(null); // Close the details modal
+        }}
+        onUnbook={async (eventId) => {
+          confirmCancelEvent(eventId);
+          setDetailsEvent(null); // Close the details modal
+        }}
+        isBooked={
+          detailsEvent && bookedEvents.some((e) => e._id === detailsEvent.id)
+        }
+      />
     </div>
   );
 };
